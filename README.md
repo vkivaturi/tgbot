@@ -13,4 +13,8 @@ This is a farily simple process. Telegram has a user called @BotFather. This is 
 4. Then choose a username ending with "_bot"
 5. Note down the HTTP API access token that @BotFather returns. This token is the only thing you will need in the code to send and receive messages from users interacting with the bot. 
 
-## Step 2 - 
+## Step 2 - Setup this application
+1. Clone this code to your local machine
+2. npm install
+3. node server.js
+4. Provide the API key in .env file
