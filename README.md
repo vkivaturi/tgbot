@@ -22,7 +22,13 @@ This is a farily simple process. Telegram has a user called @BotFather. This is 
 6. Formats of both the files is available in Samples folder
 
 ## Step 3 - Running the bot
-1. npm install
-2. node server.js
+1. `npm install`
+2. `node server.js`
 3. If you are running this on a EC2 or other Linux host, make sure the process keeps running even after SSH session terminated. Use "setsid" whicl starting
 4. Other option is to use a Docker image
+4.1 `sudo yum install -y docker`
+4.2 `sudo systemctl start docker`
+4.3 `sudo docker build -t vkivaturi/tgbot ~/tgbot/`
+4.4 `sudo docker run --env-file ~/tgbot/.env -v /home/ec2-user:/home/ec2-user -d vkivaturi/tgbot`
+
+
