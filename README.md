@@ -18,3 +18,11 @@ This is a farily simple process. Telegram has a user called @BotFather. This is 
 2. npm install
 3. node server.js
 4. Provide the API key in .env file
+5. Provide all messages in the messages input file
+6. Formats of both the files is available in Samples folder
+
+## Step 3 - Running the bot
+1. npm install
+2. node server.js
+3. If you are running this on a EC2 or other Linux host, make sure the process keeps running even after SSH session terminated. Use "setsid" whicl starting
+4. Other option is to use a Docker image
