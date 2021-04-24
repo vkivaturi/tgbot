@@ -1,0 +1,26 @@
+{
+  "name": "tgbot",
+  "version": "1.0.0",
+  "description": "Telegram based bot to manage interactions with users. Current version supports predefined set of questions that users can ask by pressing the respective buttons. This tool can be easily extended to other advanced use cases like user queries, backend API integrations, database persistence etc.",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vkivaturi/tgbot.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/vkivaturi/tgbot/issues"
+  },
+  "homepage": "https://github.com/vkivaturi/tgbot#readme",
+  "dependencies": {
+    "csv-parse": "^4.15.4",
+    "dotenv": "^8.2.0",
+    "node-telegram-bot-api": "^0.52.0",
+    "winston": "^3.3.3"
+  }
+}
