@@ -17,12 +17,14 @@ const logger = createLogger({
     ),
     transports: [
         new transports.Console(),
-        new transports.File({ filename: 'usage.log', level: 'info' })
     ]
 });
 
 //Token to access Telegram bot API. This is obtained from @BotFather
 const token = process.env.API_TOKEN;
+
+//To avoid spamming, we will restrict the bot to download not more that 4 images in a message
+const MAX_IMAGE_DOWNLOAD = 4;
 
 //The real thing... bot!!
 const bot = new TelegramBot(token, { polling: true });
@@ -86,9 +88,21 @@ bot.on('message', (msg) => {
 });
 
 function sendMessage(msg, message) {
-    bot.sendMessage(msg.chat.id, message, {
-        "reply_markup": {
-            "keyboard": keyboardLayout
+    if (message.startsWith("Image:")) {
+
+        var imageArray = message.replace("Image:", "").split(",");
+        for (var i = 0; i < MAX_IMAGE_DOWNLOAD || i < imageArray.length; i++) {
+            bot.sendPhoto(msg.chat.id, imageArray[i], {
+                "reply_markup": {
+                    "keyboard": keyboardLayout
+                }
+            });    
         }
-    });
+    } else {
+        bot.sendMessage(msg.chat.id, message, {
+            "reply_markup": {
+                "keyboard": keyboardLayout
+            }
+        });
+    }
 }
