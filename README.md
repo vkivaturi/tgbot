@@ -1,5 +1,5 @@
 # tgbot
-Telegram based bot to manage interactions with users. Current version supports predefined set of questions that users can ask by pressing the respective buttons. This tool can be easily extended to other advanced use cases like user queries, backend API integrations, database persistence etc.
+Telegram based bot to manage interactions with users. Current version supports predefined set of questions that users can ask by pressing the respective buttons. Responses to users can be provided both in text and image formats. This tool can be easily extended to other advanced use cases like user queries, backend API integrations, database persistence etc.
 
 
 ## How to build a Telegram Bot?
@@ -26,9 +26,9 @@ This is a farily simple process. Telegram has a user called @BotFather. This is 
 2. `node server.js`
 3. If you are running this on a EC2 or other Linux host, make sure the process keeps running even after SSH session terminated. Use "setsid" whicl starting
 4. Other option is to use a Docker image
-4.1 `sudo yum install -y docker`
-4.2 `sudo systemctl start docker`
-4.3 `sudo docker build -t vkivaturi/tgbot ~/tgbot/`
-4.4 `sudo docker run --env-file ~/tgbot/.env -v /home/ec2-user:/home/ec2-user -d vkivaturi/tgbot`
+`sudo yum install -y docker`
+`sudo systemctl start docker`
+`sudo docker build -t vkivaturi/tgbot ~/tgbot/`
+`sudo docker run --env-file ~/tgbot/.env -v /home/ec2-user:/home/ec2-user -d vkivaturi/tgbot`
 
 
