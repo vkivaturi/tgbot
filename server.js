@@ -2,7 +2,8 @@ const TelegramBot = require('node-telegram-bot-api');
 const { createLogger, transports, format } = require('winston');
 const fs = require('fs');
 const parse = require('csv-parse');
-const dotenv = require("dotenv")
+const dotenv = require("dotenv");
+const loadmessages = require('./utils/loadmessages');
 
 dotenv.config()
 
@@ -31,7 +32,7 @@ const bot = new TelegramBot(token, { polling: true });
 bot.on("polling_error", console.log);
 
 //This holds complete data from input messages file
-var csvData = [];
+//var csvData = [];
 
 //Data structure to hold the tiles displayed as user keyboard
 var keyboardLayout = [];
@@ -39,54 +40,67 @@ var keyboardLayout = [];
 //Data structure to hold the key value pair for title and details of each tile
 var messageMap = new Map();
 
-fs.createReadStream(process.env.MESSAGES_FILE)
-    .pipe(parse({ delimiter: '~' }))
-    .on('data', function (csvrow) {
-        csvData.push(csvrow);
-    })
-    .on('end', function () {
-        //Populate the two main data structure - Keboard layout and message map for lookups
-        //Ignore header row in csv file
-        for (var rowIndx = 1; rowIndx < csvData.length; rowIndx++) {
-            var _rowArr = csvData[rowIndx];
+loadmessages.process(messageMap, keyboardLayout);
 
-            //Populate message map for all records
-            messageMap.set(_rowArr[1], _rowArr[2]);
-
-            //Index in input files starts at 1. Hence reduce it
-            var _rowNum = _rowArr[0] - 1;
-            if (Array.isArray(keyboardLayout[_rowNum])) {
-                keyboardLayout[_rowNum].push(_rowArr[1]);
-            } else {
-                keyboardLayout[_rowNum] = new Array();
-                keyboardLayout[_rowNum].push(_rowArr[1]);
-            }
-        }
-    });
-
-const errmessage = "Sorry. You have replied with an unrecognized text. Please use one of the below buttons to interact with this bot";
+const errmessage = "Sorry. You have replied with an unrecognized text. It is also possible that our options have changed from the last time that you have interacted with the bot.\n\nPlease use one of the below buttons to interact with this bot";
 
 var message = "";
 
 //Process input message sent by the user.
-bot.on('message', (msg) => {
-    var inputtext = msg.text.toString();
+bot.on('message', async (msg) => {
 
-    if (messageMap.get(inputtext) != undefined) {
-        //User entered value is found in message map
-        logger.info(`${msg.chat.id}#${msg.from.username}#${msg.from.first_name}#${inputtext}`);
-        //Regex is needed to convert all instances of \n newline chacter in input to proper newline in string.
-        message = messageMap.get(inputtext).replace(/\\n/g, '\r\n');
-    } else if (msg.text.toString().startsWith('\/start') || msg.text.toString().toLowerCase() == "hi" || msg.text.toString().toLowerCase() == "hello") {
-        logger.info(`${msg.chat.id}#${msg.from.username}#${msg.from.first_name}#Start`);
-        message = "Welcome " + msg.from.first_name + ". Please use one of the options presented below the chat window";
+    //Feature 1 : Message file defines the questions, answers and keyboard layout of the bot. This file can be updated by Admin users only
+    if (msg.document && process.env.ADMIN_USERS.includes(msg.from.username)) {
+        logger.info(msg.document.file_id);
+        logger.info(msg.document.file_name);
+
+        var downloadFolder = process.env.MESSAGES_FOLDER;
+        bot.downloadFile(msg.document.file_id, downloadFolder).then(function (filePath) {
+            var absoluteFile = downloadFolder + '/' + process.env.MESSAGES_FILE;
+
+            fs.rename(filePath, absoluteFile, function (err, response) {
+                if (err) {
+                    return console.log(err);
+                }
+                logger.info('File uploaded and has been renamed');
+                //Reload the message in memory and update the keyboard
+                keyboardLayout = [];
+                messageMap = new Map();
+                loadmessages.process(messageMap, keyboardLayout);
+                
+                var fileprocessedmessage = 'New messages are updated and available through the bot now'; 
+                logger.info(fileprocessedmessage);
+                sendMessage(msg, fileprocessedmessage);
+            });
+        });
+
+    } else if (msg.text) {
+        //Feature 2 - Process text message sent by user and respond
+        var inputtext = msg.text.toString();
+
+        if (messageMap.get(inputtext) != undefined) {
+            //User entered value is found in message map
+            logger.info(`${msg.chat.id}#${msg.from.username}#${msg.from.first_name}#${inputtext}`);
+            //Regex is needed to convert all instances of \n newline chacter in input to proper newline in string.
+            message = messageMap.get(inputtext).replace(/\\n/g, '\r\n');
+        } else if (msg.text.toString().startsWith('\/start') || msg.text.toString().toLowerCase() == "hi" || msg.text.toString().toLowerCase() == "hello") {
+            logger.info(`${msg.chat.id}#${msg.from.username}#${msg.from.first_name}#Start`);
+            message = "Welcome " + msg.from.first_name + ". Please use one of the options presented below the chat window";
+        } else {
+            logger.info(`${msg.chat.id}#${msg.from.username}#${msg.from.first_name}#Error input#${msg.text.toString()}`);
+            message = errmessage;
+        }
+        sendMessage(msg, message);
+
     } else {
-        logger.info(`${msg.chat.id}#${msg.from.username}#${msg.from.first_name}#Error input#${msg.text.toString()}`);
-        message = errmessage;
+        logger.info(`${msg.chat.id}#${msg.from.username}#${msg.from.first_name}#Error input#Invalid input type`);
+        message = "Message type that you have sent is currentl not supported. Please use one of the below buttons to interact with this bot";
+        sendMessage(msg, message);
     }
-    sendMessage(msg, message);
+
 });
 
+//Function that sends message back the user, images to user and also render the keyboard tiles
 function sendMessage(msg, message) {
     if (message.startsWith("Image:")) {
 
@@ -96,7 +110,7 @@ function sendMessage(msg, message) {
                 "reply_markup": {
                     "keyboard": keyboardLayout
                 }
-            });    
+            });
         }
     } else {
         bot.sendMessage(msg.chat.id, message, {

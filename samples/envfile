@@ -1,3 +1,5 @@
 //Save this file as .env in the path of server.js
 API_TOKEN=1111111111:AAH_aaasasasaa89asasdasda
-MESSAGES_FILE=C:\Users\xyz\projects\tgbotmessages.csv
+MESSAGES_FILE=tgbotmessages.csv
+MESSAGES_FOLDER=C:\Users\vijay\projects\
+ADMIN_USERS=viiajd,kahdj
