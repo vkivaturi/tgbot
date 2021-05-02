@@ -5,6 +5,9 @@ const parse = require('csv-parse');
 const dotenv = require("dotenv");
 const loadmessages = require('./utils/loadmessages');
 
+const getCenters = require('./service/getCenters');
+
+
 dotenv.config()
 
 //Tgbot uses node-telegram-bot-api package. It keeps polling Telegram server to check for incoming messages and send outgoing messages
@@ -26,6 +29,10 @@ const token = process.env.API_TOKEN;
 
 //To avoid spamming, we will restrict the bot to download not more that 4 images in a message
 const MAX_IMAGE_DOWNLOAD = 4;
+
+//To avoid spamming, we will restrict the bot to make not more that 4 backend seervice calls in a message
+const MAX_SERIVCE_CALLS = 4;
+
 
 //The real thing... bot!!
 const bot = new TelegramBot(token, { polling: true });
@@ -67,8 +74,8 @@ bot.on('message', async (msg) => {
                 keyboardLayout = [];
                 messageMap = new Map();
                 loadmessages.process(messageMap, keyboardLayout);
-                
-                var fileprocessedmessage = 'New messages are updated and available through the bot now'; 
+
+                var fileprocessedmessage = 'New messages are updated and available through the bot now';
                 logger.info(fileprocessedmessage);
                 sendMessage(msg, fileprocessedmessage);
             });
@@ -83,14 +90,20 @@ bot.on('message', async (msg) => {
             logger.info(`${msg.chat.id}#${msg.from.username}#${msg.from.first_name}#${inputtext}`);
             //Regex is needed to convert all instances of \n newline chacter in input to proper newline in string.
             message = messageMap.get(inputtext).replace(/\\n/g, '\r\n');
+            sendMessage(msg, message);
         } else if (msg.text.toString().startsWith('\/start') || msg.text.toString().toLowerCase() == "hi" || msg.text.toString().toLowerCase() == "hello") {
             logger.info(`${msg.chat.id}#${msg.from.username}#${msg.from.first_name}#Start`);
             message = "Welcome " + msg.from.first_name + ". Please use one of the options presented below the chat window";
+            sendMessage(msg, message);
+            // } else if (msg.text.toString().toLowerCase() == "cowin") {
+            //     logger.info(`${msg.chat.id}#${msg.from.username}#${msg.from.first_name}#CowinCenterSearch`);
+            //     message = getCenters(msg, sendMessage);
         } else {
             logger.info(`${msg.chat.id}#${msg.from.username}#${msg.from.first_name}#Error input#${msg.text.toString()}`);
             message = errmessage;
+            sendMessage(msg, message);
         }
-        sendMessage(msg, message);
+
 
     } else {
         logger.info(`${msg.chat.id}#${msg.from.username}#${msg.from.first_name}#Error input#Invalid input type`);
@@ -105,12 +118,21 @@ function sendMessage(msg, message) {
     if (message.startsWith("Image:")) {
 
         var imageArray = message.replace("Image:", "").split(",");
-        for (var i = 0; i < MAX_IMAGE_DOWNLOAD || i < imageArray.length; i++) {
+        for (var i = 0; i < MAX_IMAGE_DOWNLOAD && i < imageArray.length; i++) {
             bot.sendPhoto(msg.chat.id, imageArray[i], {
                 "reply_markup": {
                     "keyboard": keyboardLayout
                 }
             });
+        }
+    } if (message.startsWith("Cowin:")) {
+
+        var pincodeArray = message.replace("Cowin:", "").split(",");
+        for (var i = 0; i < MAX_SERIVCE_CALLS && i < pincodeArray.length; i++) {
+            //Further fetch pincode and location name from the input string
+            var pincode = pincodeArray[i].split("-")[0];
+            var place = pincodeArray[i].split("-")[1];
+            getCenters(msg, bot, keyboardLayout, pincode, place);
         }
     } else {
         bot.sendMessage(msg.chat.id, message, {
