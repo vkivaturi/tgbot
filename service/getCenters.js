@@ -2,7 +2,7 @@ const centercache = require('../utils/centercache');
 const cowin = require('../integration/cowin');
 const moment = require('moment');
 
-const TTL_SECS = 1 * 60;
+const TTL_SECS = 15 * 60;
 
 function getCenters(msg, bot, keyboardLayout, pincode, place) {
     var userReturnMessage = "";
