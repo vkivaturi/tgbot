@@ -30,7 +30,7 @@ function getCenters(msg, bot, keyboardLayout, pincode, place) {
                 userReturnMessage = 'SEARCH_CENTER_PINCODE_NO_RESULTS';
             } else {
                 var centersList = response.data.centers;
-                var refreshTime = moment().format('DD-MMM-YYYY HH:mm');
+                var refreshTime = moment().utcOffset("+05:30").format('DD-MMM-YYYY HH:mm');
                 userReturnMessage = `Vaccine slots at *${place} ${pincode}* for coming 1 week. Last refreshed at ${refreshTime}\n\n`;
 
                 //console.log("# centersList " + JSON.stringify(centersList));
