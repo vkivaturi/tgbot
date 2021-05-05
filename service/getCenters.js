@@ -24,15 +24,14 @@ function getCenters(msg, bot, keyboardLayout, pincode, place) {
             userReturnMessage = response.data.error + '\n\n' + 'SEARCH_CENTER_PINCODE';
             console.log("$$ " + userReturnMessage);
         } else if (response.status != undefined && response.status == "200") {
+            var refreshTime = moment().utcOffset("+05:30").format('DD-MMM-YYYY HH:mm');
+            userReturnMessage = `Vaccine slots at *${place} ${pincode}* for coming 1 week. Last refreshed at ${refreshTime}\n\n`;
             //All good from Cowin. Process response data
             if (response.data.centers.length == 0) {
                 //No centers found for the pincode
-                userReturnMessage = 'SEARCH_CENTER_PINCODE_NO_RESULTS';
+                userReturnMessage = userReturnMessage + "*--No slots available--*\n";
             } else {
                 var centersList = response.data.centers;
-                var refreshTime = moment().utcOffset("+05:30").format('DD-MMM-YYYY HH:mm');
-                userReturnMessage = `Vaccine slots at *${place} ${pincode}* for coming 1 week. Last refreshed at ${refreshTime}\n\n`;
-
                 //console.log("# centersList " + JSON.stringify(centersList));
 
                 for (let i = 0; i < centersList.length; i++) {
@@ -42,10 +41,10 @@ function getCenters(msg, bot, keyboardLayout, pincode, place) {
                     //Fetch all available dates for the particular center
                     for (let j = 0; j < _sessionsList.length; j++) {
                         if (_sessionsList[j].available_capacity != "0") {
-                            _dates = _dates + _sessionsList[j].date + " for " + _sessionsList[j].min_age_limit + "+ yrs" + _sessionsList[j].vaccine + "\n";
+                            _dates = _dates + _sessionsList[j].date + " for " + _sessionsList[j].min_age_limit + "+ yrs " + _sessionsList[j].vaccine + "\n";
                         }
                     }
-                    _dates = _dates.length > 0 ? ("*Dates available*\n" + _dates + "\n") : "\n*No slots available*\n";
+                    _dates = _dates.length > 0 ? ("\n*Dates available*\n" + _dates + "\n") : "*-- All slots are booked --*\n";
                     userReturnMessage = userReturnMessage +
                         centersList[i].name + ", " + centersList[i].block_name + ", " + centersList[i].district_name + "\n"
                         + _dates + "\n";
