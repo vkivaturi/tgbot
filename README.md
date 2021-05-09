@@ -31,4 +31,10 @@ This is a farily simple process. Telegram has a user called @BotFather. This is 
 `sudo docker build -t vkivaturi/tgbot ~/tgbot/`
 `sudo docker run --env-file ~/tgbot/.env -v /home/ec2-user:/home/ec2-user -d vkivaturi/tgbot`
 
+## Key features of the bot
+1. Setup standard messages in the input file. File format is row~tile~description. Tiles will appear in the chat window keyboard layout
+2. Images are also supported in response to user input. 
+3. External API calls are also supported. In this current code, Cowin website of Indian Government is called to fetch list of centers where vaccination slots are available.
+4. Admin users can upload the messages file directly to the chat box. This upload will update the messages file.
+
 
