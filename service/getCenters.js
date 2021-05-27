@@ -2,7 +2,8 @@ const centercache = require('../utils/centercache');
 const cowin = require('../integration/cowin');
 const moment = require('moment');
 
-const TTL_SECS = 15 * 60;
+//Refresh after these many seconds. Any requests prior to this will be fetched from cache. This is to avoid hitting Cowin APIs unnecessarily
+const TTL_SECS = 10 * 60;
 
 var months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
@@ -43,7 +44,9 @@ function getCenters(msg, bot, keyboardLayout, pincode, place) {
                     //Fetch all available dates for the particular center
                     for (let j = 0; j < _sessionsList.length; j++) {
                         if (_sessionsList[j].available_capacity != "0") {
-                            _dates = _dates + "✅ " + shortenDate(_sessionsList[j].date) + " for " + _sessionsList[j].min_age_limit + "+ yrs " + _sessionsList[j].vaccine + "\n";
+                            var dose_1or2 = ((_sessionsList[j].available_capacity_dose1 != 0)?"1️⃣ ":"") + ((_sessionsList[j].available_capacity_dose2 != 0)?"2️⃣":"");
+
+                            _dates = _dates + "✅ " + shortenDate(_sessionsList[j].date) + " for " + _sessionsList[j].min_age_limit + "+ yrs " + _sessionsList[j].vaccine + " " + dose_1or2 + "\n";
                         }
                     }
                     _dates = _dates.length > 0 ? (_dates + "\n") : "❗ *All slots are booked*\n";

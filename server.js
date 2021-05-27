@@ -95,19 +95,14 @@ bot.on('message', async (msg) => {
             logger.info(`${msg.chat.id}#${msg.from.username}#${msg.from.first_name}#Start`);
             message = "Welcome " + msg.from.first_name + ". Please use one of the options presented below the chat window";
             sendMessage(msg, message);
-            // } else if (msg.text.toString().toLowerCase() == "cowin") {
-            //     logger.info(`${msg.chat.id}#${msg.from.username}#${msg.from.first_name}#CowinCenterSearch`);
-            //     message = getCenters(msg, sendMessage);
         } else {
             logger.info(`${msg.chat.id}#${msg.from.username}#${msg.from.first_name}#Error input#${msg.text.toString()}`);
             message = errmessage;
             sendMessage(msg, message);
         }
-
-
     } else {
         logger.info(`${msg.chat.id}#${msg.from.username}#${msg.from.first_name}#Error input#Invalid input type`);
-        message = "Message type that you have sent is currentl not supported. Please use one of the below buttons to interact with this bot";
+        message = "Message type that you have sent is currently not supported. Please use one of the below buttons to interact with this bot";
         sendMessage(msg, message);
     }
 
